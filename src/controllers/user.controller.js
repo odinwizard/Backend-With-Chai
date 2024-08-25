@@ -1,5 +1,5 @@
 import { user } from "../models/user.model.js";
-import { ApiError } from "../utils/ApiError.js";
+import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
@@ -32,7 +32,7 @@ const registerUser = asyncHandler( async (req, res) => {
     }
 
     // user validation............
-    const existedUser = user.findOne({
+    const existedUser = await user.findOne({
         $or: [{ userName },{ email }]
     })
 
@@ -42,7 +42,14 @@ const registerUser = asyncHandler( async (req, res) => {
 
     //image handleing..............
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0]?.path;
+    //const coverImageLocalPath = req.files?.coverImage[0]?.path;
+
+    let coverImageLocalPath;
+    if (req.files && Array.isArray(req.files.
+        coverImage) && req.files.coverImage.length > 0) {
+        coverImageLocalPath = req.files.coverImage[0].path
+    }
+
 
     if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar fille is required")
@@ -64,7 +71,7 @@ const registerUser = asyncHandler( async (req, res) => {
     userName: userName.toLowerCase()
    })
 
- const createdUser = await User.findById (user._id).select(
+ const createdUser = await user.findById(User._id).select(
     "-password -refreshToken"
  )
   if (!createdUser) {
